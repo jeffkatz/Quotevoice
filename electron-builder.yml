@@ -1,0 +1,16 @@
+appId: com.quotevoice.app
+productName: Quotevoice
+directories:
+  output: release
+  buildResources: resources
+files:
+  - dist-electron/**/*
+  - dist/**/*
+win:
+  target:
+    - nsis
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: false
+  createDesktopShortcut: true
