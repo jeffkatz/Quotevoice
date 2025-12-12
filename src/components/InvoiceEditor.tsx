@@ -585,10 +585,10 @@ export default function InvoiceEditor() {
                 {/* Type Selection */}
                 <div className="flex justify-center">
                     <div className="bg-slate-100 p-1.5 rounded-2xl inline-flex shadow-inner">
-                        <button type="button" onClick={() => setValue('type', 'quotation')} className={clsx("px-10 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 leading-none", invoiceType === 'quotation' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}>
+                        <button type="button" onClick={() => setValue('type', 'quotation', { shouldDirty: true })} className={clsx("px-10 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 leading-none", invoiceType === 'quotation' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}>
                             <span className="flex items-center gap-2"><FileText size={16} /> Quotation</span>
                         </button>
-                        <button type="button" onClick={() => setValue('type', 'invoice')} className={clsx("px-10 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 leading-none", invoiceType === 'invoice' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}>
+                        <button type="button" onClick={() => setValue('type', 'invoice', { shouldDirty: true })} className={clsx("px-10 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 leading-none", invoiceType === 'invoice' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}>
                             <span className="flex items-center gap-2"><FileText size={16} /> Invoice</span>
                         </button>
                     </div>

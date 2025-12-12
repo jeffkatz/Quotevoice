@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Search, Eye, Trash2, CheckCircle, Send, FileText, MoreHorizontal } from 'lucide-react';
-import clsx from 'clsx';
+import { Plus, Search, Trash2, CheckCircle, Send, FileText, Edit } from 'lucide-react';
 import { Invoice as DbInvoice } from '../types';
 
 type Invoice = DbInvoice & {
@@ -15,14 +14,9 @@ export default function InvoiceList() {
     const [filterType, setFilterType] = useState<string>('all');
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [settings, setSettings] = useState<any>(null);
-    const [showMenu, setShowMenu] = useState<number | null>(null);
 
     useEffect(() => {
         loadData();
-        // Close menu when clicking outside
-        const handleClickOutside = () => setShowMenu(null);
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
     const loadData = async () => {
@@ -59,7 +53,6 @@ export default function InvoiceList() {
         if (window.api) {
             await window.api.updateInvoiceStatus(id, status);
             loadData();
-            setShowMenu(null);
         }
     };
 
@@ -173,7 +166,7 @@ export default function InvoiceList() {
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50/50 border-b border-slate-100">
                         <tr>
-                            <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Number</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Document</th>
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Client</th>
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</th>
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
@@ -202,9 +195,10 @@ export default function InvoiceList() {
                             filteredInvoices.map(invoice => (
                                 <tr key={invoice.id} className="hover:bg-slate-50/80 transition-colors group cursor-default">
                                     <td className="px-6 py-4">
-                                        <span className="font-mono font-medium text-slate-900 text-sm">
-                                            {invoice.invoice_number}
-                                        </span>
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-slate-900 text-sm">{invoice.invoice_name || 'Untitled Document'}</span>
+                                            <span className="font-mono text-[10px] text-slate-400 mt-0.5">{invoice.invoice_number}</span>
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className="font-medium text-slate-700 text-sm">{invoice.client_name}</span>
@@ -225,58 +219,40 @@ export default function InvoiceList() {
                                     <td className="px-6 py-4 text-right font-bold text-slate-900 text-sm">
                                         {currency}{invoice.grand_total.toFixed(2)}
                                     </td>
-                                    <td className="px-6 py-4 text-right relative">
-                                        <div className="flex items-center justify-end gap-1">
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex items-center justify-end gap-2">
+                                            {invoice.status === 'draft' && (
+                                                <button
+                                                    onClick={(e) => handleStatusChange(invoice.id, 'sent', e)}
+                                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Mark as Sent"
+                                                >
+                                                    <Send size={18} />
+                                                </button>
+                                            )}
+                                            {invoice.status !== 'paid' && (
+                                                <button
+                                                    onClick={(e) => handleStatusChange(invoice.id, 'paid', e)}
+                                                    className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                                    title="Mark as Paid"
+                                                >
+                                                    <CheckCircle size={18} />
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={() => navigate(`/invoices/${invoice.id}`)}
-                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                title="View"
+                                                className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                                                title="Edit Document"
                                             >
-                                                <Eye size={18} />
+                                                <Edit size={18} />
                                             </button>
-                                            <div className="relative">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setShowMenu(showMenu === invoice.id ? null : invoice.id);
-                                                    }}
-                                                    className={clsx(
-                                                        "p-2 rounded-lg transition-colors",
-                                                        showMenu === invoice.id ? "bg-slate-100 text-slate-900" : "text-slate-400 hover:text-slate-900 hover:bg-slate-100"
-                                                    )}
-                                                >
-                                                    <MoreHorizontal size={18} />
-                                                </button>
-
-                                                {/* Dropdown Menu */}
-                                                {showMenu === invoice.id && (
-                                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                                                        {invoice.status === 'draft' && (
-                                                            <button
-                                                                onClick={(e) => handleStatusChange(invoice.id, 'sent', e)}
-                                                                className="w-full px-4 py-2.5 text-left text-sm hover:bg-slate-50 flex items-center gap-2.5 text-slate-700 font-medium"
-                                                            >
-                                                                <Send size={16} className="text-slate-400" /> Mark as Sent
-                                                            </button>
-                                                        )}
-                                                        {invoice.status !== 'paid' && (
-                                                            <button
-                                                                onClick={(e) => handleStatusChange(invoice.id, 'paid', e)}
-                                                                className="w-full px-4 py-2.5 text-left text-sm hover:bg-slate-50 flex items-center gap-2.5 text-green-700 font-medium"
-                                                            >
-                                                                <CheckCircle size={16} className="text-green-500" /> Mark as Paid
-                                                            </button>
-                                                        )}
-                                                        <div className="h-px bg-slate-100 my-1"></div>
-                                                        <button
-                                                            onClick={(e) => handleDelete(invoice.id, e)}
-                                                            className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-50 flex items-center gap-2.5 text-red-600 font-medium"
-                                                        >
-                                                            <Trash2 size={16} className="text-red-500" /> Delete
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <button
+                                                onClick={(e) => handleDelete(invoice.id, e)}
+                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Delete"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
