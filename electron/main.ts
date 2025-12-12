@@ -34,6 +34,59 @@ initDatabase();
 
 app.whenReady().then(() => {
     setupIpcHandlers();
+
+    // Create custom menu
+    const { Menu } = require('electron');
+    const template = [
+        {
+            label: 'File',
+            submenu: [
+                {
+                    label: 'Create Document',
+                    accelerator: 'CmdOrCtrl+N',
+                    click: () => mainWindow?.webContents.send('navigate-to', '/create')
+                },
+                { type: 'separator' },
+                { role: 'quit' }
+            ]
+        },
+        {
+            label: 'View',
+            submenu: [
+                {
+                    label: 'Dashboard',
+                    click: () => mainWindow?.webContents.send('navigate-to', '/')
+                },
+                {
+                    label: 'Documents',
+                    click: () => mainWindow?.webContents.send('navigate-to', '/invoices')
+                },
+                {
+                    label: 'Clients',
+                    click: () => mainWindow?.webContents.send('navigate-to', '/clients')
+                },
+                {
+                    label: 'Templates',
+                    click: () => mainWindow?.webContents.send('navigate-to', '/templates')
+                },
+                { type: 'separator' },
+                { role: 'reload' },
+                { role: 'toggledevtools' }
+            ]
+        },
+        {
+            label: 'Window',
+            submenu: [
+                { role: 'minimize' },
+                { role: 'zoom' },
+                { role: 'close' }
+            ]
+        }
+    ];
+
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
+
     createWindow();
 });
 

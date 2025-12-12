@@ -55,42 +55,45 @@ export default function InvoiceView() {
         }
     };
 
-    const currency = settings?.currency_symbol || 'R';
+    const currency = settings?.currency_symbol || '$';
 
     if (loading) {
         return (
-            <div className="p-8 flex items-center justify-center">
-                <div className="text-slate-500">Loading...</div>
+            <div className="p-8 flex items-center justify-center min-h-screen">
+                <div className="text-slate-400 font-medium">Loading document...</div>
             </div>
         );
     }
 
     if (!invoice) {
         return (
-            <div className="p-8 text-center">
-                <div className="text-slate-500 mb-4">Invoice not found</div>
-                <Link to="/invoices" className="text-brand-600 hover:underline">
-                    Back to Invoices
+            <div className="p-8 text-center min-h-screen flex flex-col items-center justify-center">
+                <div className="text-slate-900 font-bold text-xl mb-2">Document not found</div>
+                <p className="text-slate-500 mb-6">The invoice or quotation you are looking for does not exist.</p>
+                <Link to="/invoices" className="text-blue-600 font-medium hover:underline">
+                    Back to Documents
                 </Link>
             </div>
         );
     }
 
     return (
-        <div className="p-8 max-w-6xl mx-auto flex gap-8">
+        <div className="p-8 max-w-7xl mx-auto flex gap-8 animate-fade-in">
             {/* Sidebar Controls */}
-            <div className="w-64 space-y-4 shrink-0">
+            <div className="w-72 space-y-6 shrink-0">
                 <button
                     onClick={() => navigate('/invoices')}
-                    className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+                    className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors font-medium group pl-1"
                 >
-                    <ArrowLeft size={20} /> Back to List
+                    <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Back to List
                 </button>
 
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <div className="text-sm text-slate-500 mb-1">Document</div>
-                    <div className="text-xl font-bold text-slate-800">{invoice.invoice_number}</div>
-                    <div className={`inline-block mt-2 px-2 py-1 rounded text-xs font-medium capitalize ${invoice.status === 'paid' ? 'bg-green-100 text-green-700' :
+                <div className="card-apple p-5">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Document Status</div>
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="text-xl font-bold text-slate-900">{invoice.invoice_number}</div>
+                    </div>
+                    <div className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${invoice.status === 'paid' ? 'bg-green-100 text-green-700' :
                         invoice.status === 'sent' ? 'bg-blue-100 text-blue-700' :
                             'bg-slate-100 text-slate-600'
                         }`}>
@@ -98,53 +101,53 @@ export default function InvoiceView() {
                     </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                <div className="card-apple p-5 space-y-3">
                     <button
                         onClick={handleDownloadPDF}
-                        className="w-full flex items-center justify-center gap-2 bg-brand-600 text-white py-3 rounded-lg hover:bg-brand-700 transition font-medium"
+                        className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800 transition font-medium shadow-lg shadow-slate-900/10 active:scale-95"
                     >
                         <FileDown size={18} /> Download PDF
                     </button>
                     <button
                         onClick={() => window.print()}
-                        className="w-full flex items-center justify-center gap-2 bg-white text-slate-700 border border-slate-300 py-3 rounded-lg hover:bg-slate-50 transition font-medium"
+                        className="w-full flex items-center justify-center gap-2 bg-white text-slate-700 border border-slate-200 py-3 rounded-xl hover:bg-slate-50 transition font-medium"
                     >
                         <Printer size={18} /> Print
                     </button>
                 </div>
 
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-2">
-                    <div className="text-sm font-medium text-slate-700 mb-3">Quick Actions</div>
+                <div className="card-apple p-5 space-y-2">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Quick Actions</div>
                     {invoice.status === 'draft' && (
                         <button
                             onClick={() => handleStatusChange('sent')}
-                            className="w-full flex items-center gap-2 px-4 py-2 text-left text-sm hover:bg-slate-50 rounded-lg"
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-slate-50 rounded-lg text-slate-700 font-medium transition-colors"
                         >
-                            <Send size={16} className="text-blue-500" /> Mark as Sent
+                            <Send size={16} className="text-slate-400" /> Mark as Sent
                         </button>
                     )}
                     {invoice.status !== 'paid' && (
                         <button
                             onClick={() => handleStatusChange('paid')}
-                            className="w-full flex items-center gap-2 px-4 py-2 text-left text-sm hover:bg-green-50 rounded-lg text-green-600"
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-green-50 rounded-lg text-green-700 font-medium transition-colors"
                         >
-                            <CheckCircle size={16} /> Mark as Paid
+                            <CheckCircle size={16} className="text-green-500" /> Mark as Paid
                         </button>
                     )}
                     <button
                         onClick={() => navigate(`/invoices/edit/${invoice.id}`)}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-left text-sm hover:bg-slate-50 rounded-lg"
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-slate-50 rounded-lg text-slate-700 font-medium transition-colors"
                     >
-                        <Edit2 size={16} className="text-slate-500" /> Edit Document
+                        <Edit2 size={16} className="text-slate-400" /> Edit Document
                     </button>
                 </div>
             </div>
 
             {/* Invoice Preview */}
-            <div className="flex-1 bg-slate-200 p-8 rounded-xl overflow-auto flex justify-center">
+            <div className="flex-1 bg-slate-100/50 p-8 rounded-3xl overflow-auto flex justify-center border border-slate-200/50 shadow-inner">
                 <div
                     ref={previewRef}
-                    className="bg-white w-[210mm] min-h-[297mm] p-12 shadow-2xl text-slate-800 relative"
+                    className="bg-white w-[210mm] min-h-[297mm] p-12 shadow-2xl text-slate-800 relative transition-all"
                     style={{ fontFamily: settings?.font_family || 'Inter, system-ui, sans-serif' }}
                 >
                     {/* Background Image Layer */}
@@ -160,38 +163,40 @@ export default function InvoiceView() {
 
                     <div className="relative z-10">
                         {/* Header */}
-                        <div className="flex justify-between items-start mb-10">
+                        <div className="flex justify-between items-start mb-12">
                             <div>
                                 {logo ? (
-                                    <img src={logo} alt="Logo" className="h-16 w-auto object-contain mb-4" />
+                                    <img src={logo} alt="Logo" className="h-20 w-auto object-contain mb-4" />
                                 ) : (
-                                    <div className="text-2xl font-bold mb-4" style={{ color: settings?.primary_color || '#0ea5e9' }}>
+                                    <div className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
                                         {settings?.company_name || 'Your Company'}
                                     </div>
                                 )}
                                 {logo && (
-                                    <div className="text-xl font-bold text-slate-800">
+                                    <div className="text-xl font-bold text-slate-900">
                                         {settings?.company_name}
                                     </div>
                                 )}
                                 {settings?.company_address && (
-                                    <div className="text-sm text-slate-500 whitespace-pre-line mt-1">
+                                    <div className="text-sm text-slate-500 whitespace-pre-line mt-2 leading-relaxed">
                                         {settings.company_address}
                                     </div>
                                 )}
-                                {settings?.company_email && (
-                                    <div className="text-sm text-slate-500">{settings.company_email}</div>
-                                )}
-                                {settings?.company_phone && (
-                                    <div className="text-sm text-slate-500">{settings.company_phone}</div>
-                                )}
+                                <div className="mt-4 space-y-1">
+                                    {settings?.company_email && (
+                                        <div className="text-sm text-slate-500">{settings.company_email}</div>
+                                    )}
+                                    {settings?.company_phone && (
+                                        <div className="text-sm text-slate-500">{settings.company_phone}</div>
+                                    )}
+                                </div>
                             </div>
                             <div className="text-right">
-                                <h1 className="text-4xl font-bold text-slate-900 uppercase tracking-tight">
+                                <h1 className="text-5xl font-black text-slate-100 tracking-tight uppercase">
                                     {invoice.type}
                                 </h1>
-                                <div className="text-lg font-mono text-slate-600 mt-1">
-                                    {invoice.invoice_number}
+                                <div className="text-lg font-mono font-medium text-slate-600 mt-2">
+                                    #{invoice.invoice_number}
                                 </div>
                                 {settings?.header_text && (
                                     <div className="mt-2 text-xs text-slate-400 whitespace-pre-line max-w-[200px] ml-auto">
@@ -202,32 +207,36 @@ export default function InvoiceView() {
                         </div>
 
                         {/* Bill To & Details */}
-                        <div className="flex justify-between mb-10 pb-8 border-b border-slate-200">
+                        <div className="flex justify-between mb-12 pb-8 border-b border-slate-100">
                             <div>
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bill To</div>
+                                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Bill To</div>
                                 {invoice.client ? (
                                     <>
-                                        <div className="font-bold text-lg text-slate-800">{invoice.client.name}</div>
+                                        <div className="font-bold text-xl text-slate-900 mb-1">{invoice.client.name}</div>
                                         {invoice.client.address && (
-                                            <div className="text-sm text-slate-600 whitespace-pre-line">{invoice.client.address}</div>
+                                            <div className="text-sm text-slate-600 whitespace-pre-line leading-relaxed">{invoice.client.address}</div>
                                         )}
                                         {invoice.client.email && (
-                                            <div className="text-sm text-slate-600">{invoice.client.email}</div>
+                                            <div className="text-sm text-slate-500 mt-2">{invoice.client.email}</div>
                                         )}
                                         {invoice.client.tax_id && (
-                                            <div className="text-sm text-slate-500 mt-1">VAT: {invoice.client.tax_id}</div>
+                                            <div className="text-sm text-slate-400 mt-1">VAT: {invoice.client.tax_id}</div>
                                         )}
                                     </>
                                 ) : (
                                     <div className="text-slate-400 italic">Client not found</div>
                                 )}
                             </div>
-                            <div className="text-right">
-                                <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                                    <span className="text-slate-500">Issue Date:</span>
-                                    <span className="font-medium text-slate-800">{invoice.issue_date}</span>
-                                    <span className="text-slate-500">Due Date:</span>
-                                    <span className="font-medium text-slate-800">{invoice.due_date || '-'}</span>
+                            <div className="text-right min-w-[200px]">
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Issue Date</div>
+                                        <div className="font-semibold text-slate-900">{new Date(invoice.issue_date).toLocaleDateString(undefined, { dateStyle: 'long' })}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Due Date</div>
+                                        <div className="font-semibold text-slate-900">{invoice.due_date ? new Date(invoice.due_date).toLocaleDateString(undefined, { dateStyle: 'long' }) : '-'}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -235,20 +244,20 @@ export default function InvoiceView() {
                         {/* Items Table */}
                         <table className="w-full mb-8">
                             <thead>
-                                <tr className="border-b-2 border-slate-900">
-                                    <th className="text-left py-3 font-bold text-slate-700 text-sm">Description</th>
-                                    <th className="text-center py-3 font-bold text-slate-700 text-sm w-20">Qty</th>
-                                    <th className="text-right py-3 font-bold text-slate-700 text-sm w-28">Rate</th>
-                                    <th className="text-right py-3 font-bold text-slate-700 text-sm w-28">Amount</th>
+                                <tr className="border-b border-slate-200">
+                                    <th className="text-left py-4 font-bold text-slate-900 text-sm pl-2">Description</th>
+                                    <th className="text-center py-4 font-bold text-slate-900 text-sm w-24">Qty</th>
+                                    <th className="text-right py-4 font-bold text-slate-900 text-sm w-32">Rate</th>
+                                    <th className="text-right py-4 font-bold text-slate-900 text-sm w-32 pr-2">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-slate-50">
                                 {invoice.items?.map((item: any, i: number) => (
-                                    <tr key={i} className="border-b border-slate-100">
-                                        <td className="py-4 text-slate-700">{item.description}</td>
-                                        <td className="py-4 text-center text-slate-600">{item.quantity}</td>
-                                        <td className="py-4 text-right text-slate-600">{currency}{(item.unit_price || 0).toFixed(2)}</td>
-                                        <td className="py-4 text-right font-medium text-slate-800">
+                                    <tr key={i}>
+                                        <td className="py-4 text-slate-700 pl-2 font-medium">{item.description}</td>
+                                        <td className="py-4 text-center text-slate-500">{item.quantity}</td>
+                                        <td className="py-4 text-right text-slate-500">{currency}{(item.unit_price || 0).toFixed(2)}</td>
+                                        <td className="py-4 text-right font-bold text-slate-900 pr-2">
                                             {currency}{(item.total_price || 0).toFixed(2)}
                                         </td>
                                     </tr>
@@ -257,19 +266,19 @@ export default function InvoiceView() {
                         </table>
 
                         {/* Totals */}
-                        <div className="flex justify-end mb-8">
-                            <div className="w-72">
-                                <div className="flex justify-between py-2 text-slate-600">
+                        <div className="flex justify-end mb-12">
+                            <div className="w-80 bg-slate-50 rounded-xl p-6">
+                                <div className="flex justify-between py-2 text-slate-500 text-sm">
                                     <span>Subtotal</span>
-                                    <span>{currency}{(invoice.subtotal || 0).toFixed(2)}</span>
+                                    <span className="font-medium text-slate-900">{currency}{(invoice.subtotal || 0).toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between py-2 text-slate-600">
+                                <div className="flex justify-between py-2 text-slate-500 text-sm border-b border-slate-200 mb-2">
                                     <span>VAT ({invoice.tax_rate || 0}%)</span>
-                                    <span>{currency}{(invoice.tax_total || 0).toFixed(2)}</span>
+                                    <span className="font-medium text-slate-900">{currency}{(invoice.tax_total || 0).toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between py-3 border-t-2 border-slate-900 font-bold text-lg">
+                                <div className="flex justify-between pt-2 font-bold text-xl text-slate-900">
                                     <span>Total</span>
-                                    <span style={{ color: settings?.primary_color || '#0ea5e9' }}>
+                                    <span style={{ color: settings?.primary_color || '#0071e3' }}>
                                         {currency}{(invoice.grand_total || 0).toFixed(2)}
                                     </span>
                                 </div>
@@ -278,27 +287,27 @@ export default function InvoiceView() {
 
                         {/* Notes */}
                         {invoice.notes && (
-                            <div className="mb-8 p-4 bg-slate-50 rounded-lg">
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Notes / Terms</div>
-                                <div className="text-sm text-slate-600 whitespace-pre-line">{invoice.notes}</div>
+                            <div className="mb-8">
+                                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Notes / Terms</div>
+                                <div className="text-sm text-slate-600 whitespace-pre-line leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">{invoice.notes}</div>
                             </div>
                         )}
 
                         {/* Banking Details */}
                         {settings?.bank_details && (
-                            <div className="border-t border-slate-200 pt-6">
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Payment Details</div>
-                                <div className="text-sm text-slate-600 whitespace-pre-line font-mono">{settings.bank_details}</div>
+                            <div className="absolute bottom-12 left-12 right-12 border-t border-slate-100 pt-6">
+                                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Payment Details</div>
+                                <div className="text-xs text-slate-500 whitespace-pre-line font-mono">{settings.bank_details}</div>
                             </div>
                         )}
 
                         {/* Footer */}
                         {settings?.footer_text ? (
-                            <div className="absolute bottom-12 left-12 right-12 text-center text-xs text-slate-500 whitespace-pre-line">
+                            <div className="absolute bottom-8 left-12 right-12 text-center text-xs text-slate-400 whitespace-pre-line">
                                 {settings.footer_text}
                             </div>
                         ) : (
-                            <div className="absolute bottom-12 left-12 right-12 text-center text-xs text-slate-400">
+                            <div className="absolute bottom-8 left-12 right-12 text-center text-xs text-slate-400">
                                 Thank you for your business!
                             </div>
                         )}

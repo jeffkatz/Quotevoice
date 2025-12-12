@@ -48,6 +48,10 @@ export function setupIpcHandlers() {
         return dbService.deleteInvoice(id);
     });
 
+    ipcMain.handle('add-payment', async (_event: any, invoiceId: number, payment: any) => {
+        return dbService.addPayment(invoiceId, payment);
+    });
+
     // --- DASHBOARD STATS ---
     ipcMain.handle('get-dashboard-stats', async () => {
         return dbService.getStats();
@@ -60,6 +64,10 @@ export function setupIpcHandlers() {
 
     ipcMain.handle('update-settings', async (_event: any, newSettings: any) => {
         return dbService.updateSettings(newSettings);
+    });
+
+    ipcMain.handle('create-backup', async () => {
+        return dbService.createBackup();
     });
 
     // --- LOGO ---

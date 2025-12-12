@@ -1,18 +1,67 @@
+// Types
+export interface Payment {
+    id: number;
+    invoice_id: number;
+    amount: number;
+    date: string;
+    method: string;
+    reference?: string;
+    notes?: string;
+}
+
+export interface Client {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    tax_id: string;
+    created_at?: string;
+}
+
+export interface Invoice {
+    id: number;
+    invoice_number: string;
+    invoice_name: string;
+    client_id: number;
+    type: 'invoice' | 'quotation';
+    status: 'draft' | 'sent' | 'paid' | 'void' | 'partially_paid';
+    issue_date: string;
+    due_date?: string;
+    notes?: string;
+    subtotal: number;
+    tax_rate: number;
+    tax_total: number;
+    grand_total: number;
+    amount_paid: number;
+    balance_due: number;
+    items: {
+        description: string;
+        quantity: number;
+        unit_price: number;
+        total_price: number;
+    }[];
+    payments: Payment[];
+    created_at: string;
+    design?: DesignConfig;
+}
+
 export interface IApi {
     // Clients
-    getClients: () => Promise<any[]>;
-    getClient: (id: number) => Promise<any>;
-    createClient: (client: any) => Promise<any>;
+    getClients: () => Promise<Client[]>;
+    getClient: (id: number) => Promise<Client>;
+    createClient: (client: Partial<Client>) => Promise<Client>;
     updateClient: (id: number, updates: any) => Promise<any>;
     deleteClient: (id: number) => Promise<boolean>;
 
     // Invoices
-    getInvoices: () => Promise<any[]>;
-    getInvoice: (id: number) => Promise<any>;
+    getInvoices: () => Promise<Invoice[]>; // Use stronger type
+    getInvoice: (id: number) => Promise<Invoice & { client?: any }>;
     createInvoice: (data: any) => Promise<{ success: boolean; id?: number; invoice_number?: string; error?: string }>;
     updateInvoice: (id: number, updates: any) => Promise<any>;
     updateInvoiceStatus: (id: number, status: string) => Promise<any>;
     deleteInvoice: (id: number) => Promise<boolean>;
+    addPayment: (invoiceId: number, payment: Partial<Payment>) => Promise<{ success: boolean; payment?: Payment; error?: string }>;
 
     // Dashboard
     getDashboardStats: () => Promise<{ revenue: number; overdueInvoices: number; drafts: number }>;
@@ -32,14 +81,13 @@ export interface IApi {
         next_quote_number: number;
         primary_color: string;
         font_family: string;
-        accent_color: string;
-        // New Design Fields
         header_text?: string;
         footer_text?: string;
         background_image?: string;
         background_opacity?: number;
     }>;
     updateSettings: (settings: any) => Promise<any>;
+    createBackup: () => Promise<{ success: boolean; path?: string; error?: string }>;
 
     // Media
     uploadLogo: () => Promise<{ success: boolean; path?: string; base64?: string; error?: string }>;
@@ -47,15 +95,47 @@ export interface IApi {
     uploadBackgroundImage: () => Promise<{ success: boolean; base64?: string; error?: string }>;
 
     // Templates
-    getTemplates: () => Promise<any[]>;
-    getTemplate: (id: number) => Promise<any>;
-    createTemplate: (template: any) => Promise<any>;
-    updateTemplate: (id: number, updates: any) => Promise<any>;
+    getTemplates: () => Promise<Template[]>;
+    getTemplate: (id: number) => Promise<Template>;
+    createTemplate: (template: Partial<Template>) => Promise<Template>;
+    updateTemplate: (id: number, updates: Partial<Template>) => Promise<Template>;
     deleteTemplate: (id: number) => Promise<boolean>;
 }
+
+export type DesignConfig = {
+    logo_path?: string;
+    primary_color?: string;
+    font_family?: string;
+    header_text?: string;
+    footer_text?: string;
+    background_image?: string;
+    background_opacity?: number;
+    orientation?: 'portrait' | 'landscape';
+    logo_size?: number;
+    header_height?: number;
+    footer_height?: number;
+    content_spacing?: 'compact' | 'normal' | 'relaxed';
+};
+
+export type Template = {
+    id: number;
+    name: string;
+    description: string;
+    items: {
+        description: string;
+        quantity: number;
+        unit_price: number;
+    }[];
+    notes: string;
+    created_at: string;
+    design?: DesignConfig;
+};
 
 declare global {
     interface Window {
         api: IApi;
+        electron?: {
+            onNavigate: (callback: (path: string) => void) => void;
+        };
     }
 }

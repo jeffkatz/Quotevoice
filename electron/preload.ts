@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('api', {
     updateInvoice: (id: number, updates: any) => ipcRenderer.invoke('update-invoice', id, updates),
     updateInvoiceStatus: (id: number, status: string) => ipcRenderer.invoke('update-invoice-status', id, status),
     deleteInvoice: (id: number) => ipcRenderer.invoke('delete-invoice', id),
+    addPayment: (invoiceId: number, payment: any) => ipcRenderer.invoke('add-payment', invoiceId, payment),
 
     // Dashboard
     getDashboardStats: () => ipcRenderer.invoke('get-dashboard-stats'),
@@ -22,6 +23,7 @@ contextBridge.exposeInMainWorld('api', {
     // Settings
     getSettings: () => ipcRenderer.invoke('get-settings'),
     updateSettings: (settings: any) => ipcRenderer.invoke('update-settings', settings),
+    createBackup: () => ipcRenderer.invoke('create-backup'),
 
     // Logo
     uploadLogo: () => ipcRenderer.invoke('upload-logo'),
@@ -34,4 +36,8 @@ contextBridge.exposeInMainWorld('api', {
     createTemplate: (template: any) => ipcRenderer.invoke('create-template', template),
     updateTemplate: (id: number, updates: any) => ipcRenderer.invoke('update-template', id, updates),
     deleteTemplate: (id: number) => ipcRenderer.invoke('delete-template', id),
+});
+
+contextBridge.exposeInMainWorld('electron', {
+    onNavigate: (callback: (path: string) => void) => ipcRenderer.on('navigate-to', (_event, path) => callback(path))
 });
