@@ -1,21 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useBlocker } from 'react-router-dom';
 
 export function useUnsavedChanges(isDirty: boolean) {
-    // Handle Window Close / Refresh
-    // Handle Window Close / Refresh - Disabled to allow Close button to always work
-    /*
-    useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isDirty) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isDirty]);
-    */
+    const [showModal, setShowModal] = useState(false);
 
     // Handle Navigation
     const blocker = useBlocker(
@@ -25,12 +12,23 @@ export function useUnsavedChanges(isDirty: boolean) {
 
     useEffect(() => {
         if (blocker.state === "blocked") {
-            const leave = window.confirm("You have unsaved changes. Are you sure you want to leave without saving?");
-            if (leave) {
-                blocker.proceed();
-            } else {
-                blocker.reset();
-            }
+            setShowModal(true);
+        } else {
+            setShowModal(false);
         }
     }, [blocker]);
+
+    const confirmLeave = useCallback(() => {
+        if (blocker.state === "blocked") {
+            blocker.proceed();
+        }
+    }, [blocker]);
+
+    const cancelLeave = useCallback(() => {
+        if (blocker.state === "blocked") {
+            blocker.reset();
+        }
+    }, [blocker]);
+
+    return { showModal, confirmLeave, cancelLeave };
 }
