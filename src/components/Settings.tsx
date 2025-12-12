@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { Save, Upload, Building2, CreditCard, Receipt, Image, Monitor, FolderOpen } from 'lucide-react';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import RichTextEditor from './RichTextEditor';
+import Modal from './Modal';
 
 type SettingsData = {
     company_name: string;
@@ -24,7 +25,7 @@ export default function Settings() {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-    useUnsavedChanges(isDirty && !saving);
+    const { showModal: showUnsavedModal, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty && !saving);
 
     useEffect(() => {
         loadSettings();
@@ -304,6 +305,17 @@ export default function Settings() {
                     </button>
                 </div>
             </form>
-        </div>
+
+            <Modal
+                isOpen={showUnsavedModal}
+                title="Unsaved Changes"
+                description="You have unsaved changes. Are you sure you want to leave without saving?"
+                type="warning"
+                confirmText="Leave"
+                cancelText="Stay"
+                onConfirm={confirmLeave}
+                onCancel={cancelLeave}
+            />
+        </div >
     );
 }

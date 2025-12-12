@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import type { DesignConfig, Template } from '../types';
 import RichTextEditor from './RichTextEditor';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
+import Modal from './Modal';
 
 type FormValues = {
     invoice_number: string;
@@ -67,7 +68,7 @@ export default function InvoiceEditor() {
         }
     });
 
-    useUnsavedChanges(isDirty && !saving);
+    const { showModal: showUnsavedModal, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty && !saving);
 
     const { fields, append, remove, replace } = useFieldArray({ control, name: 'items' });
 
@@ -696,6 +697,19 @@ export default function InvoiceEditor() {
                     </div>
                 </div>
             </div>
-        </div>
+
+
+            {/* Unsaved Changes Warning Modal */}
+            <Modal
+                isOpen={showUnsavedModal}
+                title="Unsaved Changes"
+                description="You have unsaved changes. Are you sure you want to leave without saving?"
+                type="warning"
+                confirmText="Leave"
+                cancelText="Stay"
+                onConfirm={confirmLeave}
+                onCancel={cancelLeave}
+            />
+        </div >
     );
 }

@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form';
 import { Plus, Search, Edit2, X, User, Mail, Phone, CreditCard, LayoutGrid, List, FileDown, Upload } from 'lucide-react';
 import clsx from 'clsx';
 import type { Client } from '../types';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
+import Modal from './Modal';
 
 export default function Clients() {
     const [clients, setClients] = useState<Client[]>([]);
@@ -12,7 +14,9 @@ export default function Clients() {
     const [searchTerm, setSearchTerm] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const { register, handleSubmit, reset, setValue } = useForm<Client>();
+    const { register, handleSubmit, reset, setValue, formState: { isDirty } } = useForm<Client>();
+
+    const { showModal: showUnsavedModal, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty && isModalOpen);
 
     const fetchClients = async () => {
         if (window.api) {
@@ -324,6 +328,18 @@ export default function Clients() {
                     </div>
                 </div>
             )}
+
+
+            <Modal
+                isOpen={showUnsavedModal}
+                title="Unsaved Changes"
+                description="You have unsaved changes. Are you sure you want to leave without saving?"
+                type="warning"
+                confirmText="Leave"
+                cancelText="Stay"
+                onConfirm={confirmLeave}
+                onCancel={cancelLeave}
+            />
         </div>
     );
 }
