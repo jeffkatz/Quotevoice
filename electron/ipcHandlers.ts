@@ -1,107 +1,67 @@
 import { ipcMain } from 'electron';
-import { dbService } from './db';
+import { clientService } from './services/client.service';
+import { invoiceService } from './domain/invoice/invoice.service';
+import { settingsService } from './services/settings.service';
+
+import { DatabaseManager } from './database';
 
 export function setupIpcHandlers() {
     // --- CLIENTS ---
-    ipcMain.handle('get-clients', async () => {
-        return dbService.getClients();
-    });
-
-    ipcMain.handle('get-client', async (_event: any, id: number) => {
-        return dbService.getClient(id);
-    });
-
-    ipcMain.handle('create-client', async (_event: any, client: any) => {
-        return dbService.createClient(client);
-    });
-
-    ipcMain.handle('update-client', async (_event: any, id: number, updates: any) => {
-        return dbService.updateClient(id, updates);
-    });
-
-    ipcMain.handle('delete-client', async (_event: any, id: number) => {
-        return dbService.deleteClient(id);
-    });
+    ipcMain.handle('get-clients', async () => clientService.getAll());
+    ipcMain.handle('get-client', async (_, id: number) => clientService.getById(id));
+    ipcMain.handle('create-client', async (_, client) => clientService.create(client));
+    ipcMain.handle('update-client', async (_, id, updates) => clientService.update(id, updates));
+    ipcMain.handle('delete-client', async (_, id) => clientService.delete(id));
 
     // --- INVOICES ---
-    ipcMain.handle('get-invoices', async () => {
-        return dbService.getInvoices();
+    ipcMain.handle('get-invoices', async () => invoiceService.getAll());
+    ipcMain.handle('get-invoice', async (_, id: number) => invoiceService.getById(id));
+    ipcMain.handle('create-invoice', async (_, data) => {
+        // Domain service handles DTO validation
+        return invoiceService.create(data);
     });
-
-    ipcMain.handle('get-invoice', async (_event: any, id: number) => {
-        return dbService.getInvoice(id);
+    ipcMain.handle('update-invoice', async (_, id, updates) => {
+        // Domain service handles DTO validation
+        return invoiceService.update(id, updates);
     });
-
-    ipcMain.handle('create-invoice', async (_event: any, data: any) => {
-        return dbService.createInvoice(data);
-    });
-
-    ipcMain.handle('update-invoice', async (_event: any, id: number, updates: any) => {
-        return dbService.updateInvoice(id, updates);
-    });
-
-    ipcMain.handle('update-invoice-status', async (_event: any, id: number, status: any) => {
-        return dbService.updateInvoiceStatus(id, status);
-    });
-
-    ipcMain.handle('delete-invoice', async (_event: any, id: number) => {
-        return dbService.deleteInvoice(id);
-    });
-
-    ipcMain.handle('add-payment', async (_event: any, invoiceId: number, payment: any) => {
-        return dbService.addPayment(invoiceId, payment);
-    });
+    ipcMain.handle('update-invoice-status', async (_, id, status) => invoiceService.update(id, { status }));
+    ipcMain.handle('delete-invoice', async (_, id) => invoiceService.delete(id));
+    ipcMain.handle('add-payment', async (_, invoiceId, payment) => invoiceService.addPayment(invoiceId, payment));
 
     // --- DASHBOARD STATS ---
     ipcMain.handle('get-dashboard-stats', async () => {
-        return dbService.getStats();
+        const db = DatabaseManager.getInstance();
+        const paid = db.get<{ sum: number }>('SELECT SUM(grand_total) as sum FROM invoices WHERE status = \'paid\'')?.sum || 0;
+        const partial = db.get<{ sum: number }>('SELECT SUM(amount_paid) as sum FROM invoices WHERE status = \'partially_paid\'')?.sum || 0;
+        const overdue = db.get<{ count: number }>('SELECT COUNT(*) as count FROM invoices WHERE status != \'paid\' AND status != \'void\' AND due_date < date(\'now\')')?.count || 0;
+        const drafts = db.get<{ count: number }>('SELECT COUNT(*) as count FROM invoices WHERE status = \'draft\'')?.count || 0;
+
+        const revenueTrend = db.query<{ month: string, amount: number }>(`
+            SELECT strftime('%Y-%m', issue_date) as month, SUM(grand_total) as amount
+            FROM invoices
+            WHERE status = 'paid' OR status = 'partially_paid'
+            GROUP BY month
+            ORDER BY month ASC
+            LIMIT 6
+        `);
+
+        return {
+            revenue: paid + partial,
+            overdueInvoices: overdue,
+            drafts: drafts,
+            revenueTrend
+        };
     });
 
     // --- SETTINGS ---
-    ipcMain.handle('get-settings', async () => {
-        return dbService.getSettings();
-    });
+    ipcMain.handle('get-settings', async () => settingsService.getAll());
+    ipcMain.handle('update-settings', async (_, newSettings) => settingsService.update(newSettings));
 
-    ipcMain.handle('update-settings', async (_event: any, newSettings: any) => {
-        return dbService.updateSettings(newSettings);
-    });
-
-    ipcMain.handle('create-backup', async () => {
-        return dbService.createBackup();
-    });
-
-    // --- LOGO ---
-    ipcMain.handle('upload-logo', async () => {
-        return dbService.uploadLogo();
-    });
-
-    ipcMain.handle('get-logo', async () => {
-        return dbService.getLogoBase64();
-    });
-
-    ipcMain.handle('upload-background-image', async () => {
-        return dbService.uploadBackgroundImage();
-    });
+    // TODO: Re-implement backup/logo if critical, for now focus on core logic
+    ipcMain.handle('create-backup', async () => { return { success: false, error: 'Not implemented in SQL mode yet' } });
+    ipcMain.handle('upload-logo', async () => { return { success: false, error: 'Not implemented in SQL mode yet' } });
+    ipcMain.handle('get-logo', async () => { return (settingsService.getAll() as any).logo_path; }); // Stored as base64 in value
+    ipcMain.handle('upload-background-image', async () => { return { success: false, error: 'Not implemented' } });
 
 
-    // --- TEMPLATES ---
-    ipcMain.handle('get-templates', async () => {
-        return dbService.getTemplates();
-    });
-
-    ipcMain.handle('get-template', async (_event: any, id: number) => {
-        return dbService.getTemplate(id);
-    });
-
-    ipcMain.handle('create-template', async (_event: any, template: any) => {
-        return dbService.createTemplate(template);
-    });
-
-    ipcMain.handle('update-template', async (_event: any, id: number, updates: any) => {
-        return dbService.updateTemplate(id, updates);
-    });
-
-    ipcMain.handle('delete-template', async (_event: any, id: number) => {
-        return dbService.deleteTemplate(id);
-    });
 }

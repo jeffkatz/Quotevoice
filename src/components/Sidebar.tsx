@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Settings as SettingsIcon, FileText, FolderOpen, Layout, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, Settings as SettingsIcon, FileText, FolderOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function Sidebar() {
@@ -18,7 +18,7 @@ export default function Sidebar() {
         { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/invoices', icon: FolderOpen, label: 'Invoices' },
         { path: '/clients', icon: Users, label: 'Clients' },
-        { path: '/templates', icon: Layout, label: 'Templates' },
+
         { path: '/settings', icon: SettingsIcon, label: 'Settings' },
     ];
 

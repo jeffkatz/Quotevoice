@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { setupIpcHandlers } from './ipcHandlers';
-import { initDatabase } from './db';
+import { DatabaseManager } from './database';
 
 
 let mainWindow: BrowserWindow | null = null;
@@ -30,7 +30,7 @@ function createWindow() {
 }
 
 // Initialize things
-initDatabase();
+DatabaseManager.getInstance();
 
 app.whenReady().then(() => {
     setupIpcHandlers();
@@ -44,7 +44,7 @@ app.whenReady().then(() => {
                 {
                     label: 'Create Document',
                     accelerator: 'CmdOrCtrl+N',
-                    click: () => mainWindow?.webContents.send('navigate-to', '/create')
+                    click: () => mainWindow?.webContents.send('navigate-to', '/invoices/new')
                 },
                 { type: 'separator' },
                 { role: 'quit' }
@@ -65,10 +65,7 @@ app.whenReady().then(() => {
                     label: 'Clients',
                     click: () => mainWindow?.webContents.send('navigate-to', '/clients')
                 },
-                {
-                    label: 'Templates',
-                    click: () => mainWindow?.webContents.send('navigate-to', '/templates')
-                },
+
                 { type: 'separator' },
                 { role: 'reload' },
                 { role: 'toggledevtools' }

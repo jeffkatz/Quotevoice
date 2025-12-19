@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { Plus, Search, Edit2, X, User, Mail, Phone, CreditCard, LayoutGrid, List, FileDown, Upload } from 'lucide-react';
 import clsx from 'clsx';
-import type { Client } from '../types';
-import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
-import Modal from './Modal';
+import type { Client } from '../../../types';
+import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
+import Modal from '../../../components/Modal';
 
 export default function Clients() {
     const [clients, setClients] = useState<Client[]>([]);

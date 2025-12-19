@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Save, Upload, Building2, CreditCard, Receipt, Image, Monitor, FolderOpen } from 'lucide-react';
-import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
-import RichTextEditor from './RichTextEditor';
-import Modal from './Modal';
+import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
+import RichTextEditor from '../../../components/RichTextEditor';
+import Modal from '../../../components/Modal';
 
 type SettingsData = {
     company_name: string;

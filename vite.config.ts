@@ -14,7 +14,7 @@ export default defineConfig({
         vite: {
           build: {
             rollupOptions: {
-              external: [],
+              external: ['better-sqlite3'],
             },
           },
         },

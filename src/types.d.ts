@@ -64,7 +64,7 @@ export interface IApi {
     addPayment: (invoiceId: number, payment: Partial<Payment>) => Promise<{ success: boolean; payment?: Payment; error?: string }>;
 
     // Dashboard
-    getDashboardStats: () => Promise<{ revenue: number; overdueInvoices: number; drafts: number }>;
+    getDashboardStats: () => Promise<{ revenue: number; overdueInvoices: number; drafts: number; revenueTrend: { month: string; amount: number }[] }>;
 
     // Settings
     getSettings: () => Promise<{
@@ -94,12 +94,7 @@ export interface IApi {
     getLogo: () => Promise<string | null>;
     uploadBackgroundImage: () => Promise<{ success: boolean; base64?: string; error?: string }>;
 
-    // Templates
-    getTemplates: () => Promise<Template[]>;
-    getTemplate: (id: number) => Promise<Template>;
-    createTemplate: (template: Partial<Template>) => Promise<Template>;
-    updateTemplate: (id: number, updates: Partial<Template>) => Promise<Template>;
-    deleteTemplate: (id: number) => Promise<boolean>;
+
 }
 
 export type DesignConfig = {
@@ -117,19 +112,7 @@ export type DesignConfig = {
     content_spacing?: 'compact' | 'normal' | 'relaxed';
 };
 
-export type Template = {
-    id: number;
-    name: string;
-    description: string;
-    items: {
-        description: string;
-        quantity: number;
-        unit_price: number;
-    }[];
-    notes: string;
-    created_at: string;
-    design?: DesignConfig;
-};
+
 
 declare global {
     interface Window {

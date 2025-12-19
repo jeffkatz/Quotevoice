@@ -1,14 +1,11 @@
 import { createHashRouter } from 'react-router-dom';
 import App from './App';
-import Dashboard from './components/Dashboard';
-import InvoiceList from './components/InvoiceList';
-import InvoiceEditor from './components/InvoiceEditor';
-import InvoiceView from './components/InvoiceView';
-import Clients from './components/Clients';
-import Settings from './components/Settings';
-import Templates from './components/Templates';
-import TemplateEditor from './components/TemplateEditor';
-import TemplatePicker from './components/TemplatePicker';
+import Dashboard from './features/dashboard/components/Dashboard';
+import InvoiceList from './features/invoices/components/InvoiceList';
+import InvoiceEditor from './features/invoices/components/InvoiceEditor';
+import InvoiceView from './features/invoices/components/InvoiceView';
+import Clients from './features/clients/components/Clients';
+import Settings from './features/settings/components/Settings';
 
 export const router = createHashRouter([
     {
@@ -17,13 +14,10 @@ export const router = createHashRouter([
         children: [
             { path: "/", element: <Dashboard /> },
             { path: "/invoices", element: <InvoiceList /> },
-            { path: "/create", element: <TemplatePicker /> },
             { path: "/invoices/new", element: <InvoiceEditor /> },
             { path: "/invoices/:id", element: <InvoiceView /> },
             { path: "/invoices/edit/:id", element: <InvoiceEditor /> },
             { path: "/clients", element: <Clients /> },
-            { path: "/templates", element: <Templates /> },
-            { path: "/templates/:id", element: <TemplateEditor /> },
             { path: "/settings", element: <Settings /> },
         ]
     }

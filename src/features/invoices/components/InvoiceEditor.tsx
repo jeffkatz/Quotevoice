@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Plus, Trash2, Save, FileDown, Eye, ArrowLeft, Printer, Calendar, User, FileText, ChevronDown, CheckCircle } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import clsx from 'clsx';
-import type { DesignConfig, Template } from '../types';
-import RichTextEditor from './RichTextEditor';
-import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
-import Modal from './Modal';
+import type { DesignConfig } from '../../../types';
+import RichTextEditor from '../../../components/RichTextEditor';
+import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
+import Modal from '../../../components/Modal';
 
 type FormValues = {
     invoice_number: string;
@@ -40,14 +41,14 @@ type Settings = {
 
 export default function InvoiceEditor() {
     const { id } = useParams();
-    const location = useLocation();
+
 
     // States
     const [clients, setClients] = useState<any[]>([]);
-    const [templatesList, setTemplatesList] = useState<Template[]>([]);
+
     const [globalSettings, setGlobalSettings] = useState<Settings | null>(null);
     const [design, setDesign] = useState<DesignConfig | null>(null);
-    const [template, setTemplate] = useState<Template | null>(null);
+
     const [isPreview, setIsPreview] = useState(false);
     const [saving, setSaving] = useState(false);
     const [savedInvoice, setSavedInvoice] = useState<any | null>(null); // Relaxed type to include payments
@@ -70,7 +71,7 @@ export default function InvoiceEditor() {
 
     const { showModal: showUnsavedModal, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty && !saving);
 
-    const { fields, append, remove, replace } = useFieldArray({ control, name: 'items' });
+    const { fields, append, remove } = useFieldArray({ control, name: 'items' });
 
     const invoiceType = watch('type');
     const items = watch('items');
@@ -103,14 +104,12 @@ export default function InvoiceEditor() {
     const loadData = async () => {
         if (!window.api) return;
         try {
-            const [clientsData, settingsData, templatesData] = await Promise.all([
+            const [clientsData, settingsData] = await Promise.all([
                 window.api.getClients(),
-                window.api.getSettings(),
-                window.api.getTemplates()
+                window.api.getSettings()
             ]);
             setClients(clientsData);
             setGlobalSettings(settingsData);
-            setTemplatesList(templatesData);
 
             if (id) {
                 const invoice = await window.api.getInvoice(Number(id));
@@ -135,45 +134,16 @@ export default function InvoiceEditor() {
                     // but for now we follow existing behavior. 
                     // Just defaulting to edit mode, let user switch to preview.
                 }
-            } else if (location.state?.templateId) {
-                const tmpl = templatesData.find((t: Template) => t.id === location.state.templateId);
-                if (tmpl) applyTemplate(tmpl, true);
-            } else {
-                if (templatesData.length > 0) applyTemplate(templatesData[0], true);
+
             }
         } catch (e) {
             console.error('Failed to load data:', e);
         }
     };
 
-    const applyTemplate = (tmpl: Template, applyContent = false) => {
-        setTemplate(tmpl);
-        if (tmpl.design) setDesign(tmpl.design);
 
-        if (applyContent) {
-            // Only applied on initial creation or explicit "Reset to Template" action
-            if (tmpl.items && tmpl.items.length > 0) {
-                // Logic to replace items excluded per user request "All invoice data stays intact. Only layout updates"
-                // So we only do this on *Creation*, which this function handles via applyContent=true
-                replace(tmpl.items.map(item => ({
-                    description: item.description,
-                    quantity: item.quantity,
-                    unit_price: item.unit_price
-                })));
-            }
-            if (tmpl.notes) setValue('notes', tmpl.notes);
-        }
-    };
 
-    const handleTemplateSwitch = (tmplId: string) => {
-        const tmpl = templatesList.find(t => t.id === Number(tmplId));
-        if (tmpl) {
-            // "When switching templates: All invoice data stays intact. Only layout/style updates."
-            setTemplate(tmpl);
-            if (tmpl.design) setDesign(tmpl.design);
-            // We do NOT call applyContent here.
-        }
-    };
+
 
     const onSubmit = async (data: FormValues) => {
         if (!window.api) return;
@@ -197,8 +167,9 @@ export default function InvoiceEditor() {
                     // Update local state to reflect potentially new generated number or other backend changes
                     setSavedInvoice({ ...savedInvoice, ...invoiceData });
                     reset(data); // Reset dirty
+                    toast.success('Invoice updated successfully');
                 } else {
-                    alert('Failed to update invoice');
+                    toast.error('Failed to update invoice');
                 }
             } else {
                 const result = await window.api.createInvoice(invoiceData);
@@ -210,13 +181,14 @@ export default function InvoiceEditor() {
                         setValue('invoice_number', result.invoice_number);
                     }
                     reset({ ...data, invoice_number: result.invoice_number || data.invoice_number });
+                    toast.success('Invoice created successfully');
                 } else {
-                    alert('Failed to save: ' + result.error);
+                    toast.error('Failed to save: ' + result.error);
                 }
             }
         } catch (e) {
             console.error('Failed to save:', e);
-            alert('An error occurred while saving');
+            toast.error('An error occurred while saving');
         }
         setSaving(false);
     };
@@ -244,9 +216,10 @@ export default function InvoiceEditor() {
                 const updatedInvoice = await window.api.getInvoice(savedInvoice.id);
                 setSavedInvoice(updatedInvoice);
                 setShowPaymentModal(false);
+                toast.success('Payment recorded successfully');
             } catch (err) {
                 console.error('Failed to add payment', err);
-                alert('Failed to add payment');
+                toast.error('Failed to add payment');
             }
         }
     };
@@ -264,7 +237,7 @@ export default function InvoiceEditor() {
             pdf.save(filename);
         } catch (e) {
             console.error('PDF generation failed:', e);
-            alert('Failed to generate PDF');
+            toast.error('Failed to generate PDF');
         }
     };
 
@@ -553,23 +526,7 @@ export default function InvoiceEditor() {
                     <Link to="/" className="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-2 font-medium transition-colors"><ArrowLeft size={16} /> Back to Dashboard</Link>
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Create Document</h1>
 
-                    {/* Template Switcher */}
-                    <div className="flex items-center gap-2 mt-2">
-                        <span className="text-slate-500 font-medium text-sm">Template:</span>
-                        <div className="relative group">
-                            <select
-                                onChange={(e) => handleTemplateSwitch(e.target.value)}
-                                value={template?.id || ''}
-                                className="appearance-none bg-slate-100 hover:bg-slate-200 pl-3 pr-8 py-1 rounded-lg text-sm font-semibold text-slate-900 transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-slate-900/20"
-                            >
-                                <option value="" disabled>Select Template</option>
-                                {templatesList.map(t => (
-                                    <option key={t.id} value={t.id}>{t.name}</option>
-                                ))}
-                            </select>
-                            <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
-                        </div>
-                    </div>
+
                 </div>
                 <div className="flex gap-3">
                     <button onClick={() => setIsPreview(true)} className="flex items-center gap-2 px-5 py-2.5 border border-slate-200 rounded-full bg-white text-slate-700 hover:bg-slate-50 transition-colors font-medium shadow-sm hover:shadow">

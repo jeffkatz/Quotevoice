@@ -1,6 +1,5 @@
 {
     "name": "quotevoice",
-    "private": true,
     "version": "1.0.0",
     "main": "dist-electron/main.js",
     "description": "Professional Invoice and Quotation Manager",
@@ -13,6 +12,7 @@
     "dependencies": {
         "@ckeditor/ckeditor5-build-decoupled-document": "^41.4.2",
         "@ckeditor/ckeditor5-react": "^11.0.0",
+        "better-sqlite3": "^12.5.0",
         "clsx": "^2.1.0",
         "html2canvas": "^1.4.1",
         "jspdf": "^3.0.4",
@@ -21,12 +21,14 @@
         "react-dom": "^18.2.0",
         "react-hook-form": "^7.51.0",
         "react-router-dom": "^6.22.3",
-        "recharts": "^2.12.2",
+        "recharts": "^2.15.4",
+        "sonner": "^2.0.7",
         "tailwind-merge": "^2.2.1",
         "zod": "^3.22.4",
         "zustand": "^4.5.1"
     },
     "devDependencies": {
+        "@types/better-sqlite3": "^7.6.13",
         "@types/node": "^20.11.24",
         "@types/react": "^18.2.61",
         "@types/react-dom": "^18.2.19",

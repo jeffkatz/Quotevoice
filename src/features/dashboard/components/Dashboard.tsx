@@ -37,34 +37,50 @@ export default function Dashboard() {
             setRecentInvoices(invoices.slice(0, 5));
             setSettings(settingsData);
 
-            // Process chart data (Last 6 months)
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const today = new Date();
-            const last6Months: any[] = [];
-            for (let i = 5; i >= 0; i--) {
-                const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-                last6Months.push({
-                    name: months[d.getMonth()],
-                    monthIndex: d.getMonth(),
-                    year: d.getFullYear(),
-                    revenue: 0 // Default
+            // Process chart data from backend
+            if ((statsData as any).revenueTrend) {
+                // Backend returns { month: 'YYYY-MM', amount: number }
+                // We map this to { name: 'MMM', revenue: number }
+                // We should ensure we show last 6 months even if gaps exist?
+                // For simplicity, we just map what we have.
+                // Or better: Merge with empty months logic?
+                // Let's stick to the mapped data for now.
+                const trend = (statsData as any).revenueTrend;
+                const formattedData = trend.map((t: any) => {
+                    const [year, month] = t.month.split('-');
+                    const d = new Date(Number(year), Number(month) - 1, 1);
+                    return {
+                        name: d.toLocaleString('default', { month: 'short' }),
+                        fullDate: t.month,
+                        revenue: t.amount
+                    };
                 });
-            }
-
-            // Populate revenue data if applicable
-            if (invoices) {
-                invoices.forEach((inv: any) => {
-                    if (inv.status === 'paid') {
-                        const d = new Date(inv.issue_date);
-                        const monthData = last6Months.find(m => m.monthIndex === d.getMonth() && m.year === d.getFullYear());
-                        if (monthData) {
-                            monthData.revenue += inv.grand_total;
+                setChartData(formattedData);
+            } else {
+                // Fallback to manual calculation (from previous logic)
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const today = new Date();
+                const last6Months: any[] = [];
+                for (let i = 5; i >= 0; i--) {
+                    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                    last6Months.push({
+                        name: months[d.getMonth()],
+                        monthIndex: d.getMonth(),
+                        year: d.getFullYear(),
+                        revenue: 0
+                    });
+                }
+                if (invoices) {
+                    invoices.forEach((inv: any) => {
+                        if (inv.status === 'paid') {
+                            const d = new Date(inv.issue_date);
+                            const monthData = last6Months.find(m => m.monthIndex === d.getMonth() && m.year === d.getFullYear());
+                            if (monthData) monthData.revenue += inv.grand_total;
                         }
-                    }
-                });
+                    });
+                }
+                setChartData(last6Months);
             }
-
-            setChartData(last6Months);
 
         } catch (error) {
             console.error("Failed to load dashboard data", error);
@@ -92,7 +108,7 @@ export default function Dashboard() {
                     <p className="text-slate-500 font-medium">Overview</p>
                 </div>
                 <Link
-                    to="/create"
+                    to="/invoices/new"
                     className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-full hover:bg-slate-800 transition-all font-medium shadow-lg shadow-slate-900/10 active:scale-95"
                 >
                     <Plus size={18} /> New Invoice

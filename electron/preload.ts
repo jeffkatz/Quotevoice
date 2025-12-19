@@ -30,12 +30,7 @@ contextBridge.exposeInMainWorld('api', {
     getLogo: () => ipcRenderer.invoke('get-logo'),
     uploadBackgroundImage: () => ipcRenderer.invoke('upload-background-image'),
 
-    // Templates
-    getTemplates: () => ipcRenderer.invoke('get-templates'),
-    getTemplate: (id: number) => ipcRenderer.invoke('get-template', id),
-    createTemplate: (template: any) => ipcRenderer.invoke('create-template', template),
-    updateTemplate: (id: number, updates: any) => ipcRenderer.invoke('update-template', id, updates),
-    deleteTemplate: (id: number) => ipcRenderer.invoke('delete-template', id),
+
 });
 
 contextBridge.exposeInMainWorld('electron', {

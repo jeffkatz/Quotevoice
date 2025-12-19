@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, Trash2, CheckCircle, Send, FileText, Edit } from 'lucide-react';
-import { Invoice as DbInvoice } from '../types';
+import { Invoice as DbInvoice } from '../../../types';
 
 type Invoice = DbInvoice & {
     client_name?: string;
@@ -91,7 +91,7 @@ export default function InvoiceList() {
                     <p className="text-slate-500 mt-1 font-medium">Manage your invoices and quotations</p>
                 </div>
                 <Link
-                    to="/create"
+                    to="/invoices/new"
                     className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-full hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 font-medium active:scale-95"
                 >
                     <Plus size={18} /> Create New

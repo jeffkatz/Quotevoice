@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Toaster } from 'sonner';
 import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 
@@ -15,6 +16,7 @@ function App() {
 
     return (
         <div className="flex h-screen overflow-hidden bg-[#f5f5f7] font-sans text-slate-900">
+            <Toaster position="top-right" richColors />
             <Sidebar />
             <div className="flex-1 overflow-auto relative">
                 <Outlet />
